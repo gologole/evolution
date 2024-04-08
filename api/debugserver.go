@@ -55,7 +55,6 @@ func setCellHandler(w http.ResponseWriter, r *http.Request) {
 					log.Fatalf("Failed to encode data to JSON: %v", err)
 				}
 
-				url := "http://example.com/api"
 				resp, err := http.Post(url, "application/json", bytes.NewBuffer(jsonData))
 				if err != nil {
 					log.Fatalf("Failed to make POST request: %v", err)
