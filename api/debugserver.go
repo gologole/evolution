@@ -48,6 +48,8 @@ func setCellHandler(w http.ResponseWriter, r *http.Request) {
 		cell.OrganicAfterdie, _ = strconv.Atoi(r.FormValue("OrganicAfterdie"))
 		cell.EnergyAfterdie, _ = strconv.Atoi(r.FormValue("EnergyAfterdie"))
 
+		fmt.Println(cell)
+
 		//обновление поля
 		debugmap.SetCell(newmap, cell.X_coord, cell.Y_coord, cell)
 
@@ -80,6 +82,7 @@ func initmapHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
+	fmt.Println(newmap)
 }
 
 func staticHandler(w http.ResponseWriter, r *http.Request) {
