@@ -20,8 +20,11 @@ func RunDebug() {
 	fmt.Scan(&port)
 	fmt.Println("set frontend url")
 	fmt.Scan(&url)
+
 	http.HandleFunc("/debug/initmap", initmapHandler)
 	http.HandleFunc("/debug/setCell", setCellHandler)
+	http.HandleFunc("/debugsite", staticHandler)
+
 	http.ListenAndServe(":"+strconv.Itoa(port), nil)
 
 	fmt.Println("Debug server is start")
@@ -65,7 +68,6 @@ func setCellHandler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
-
 }
 
 func initmapHandler(w http.ResponseWriter, r *http.Request) {
@@ -78,4 +80,8 @@ func initmapHandler(w http.ResponseWriter, r *http.Request) {
 	} else {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 	}
+}
+
+func staticHandler(w http.ResponseWriter, r *http.Request) {
+	http.ServeFile(w, r, "jsjs.html")
 }

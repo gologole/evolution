@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PixiJS Map</title>
+<script src="https://pixijs.download/v5.3.10/pixi.min.js"></script>
+</head>
+<body>
+<script >const app = new PIXI.Application({ width: 1350, height: 1350, antialias: true });
+document.body.appendChild(app.view);
+const chunks = [[], [], [], []];
+const totalCells = 10000;
+const colors = [0xff0000, 0x00ff00, 0x0000ff, 0xffff00, 0xff00ff, 0x00ffff, 0xf0f0f0];
+const cellSize = 10;
+const cellGap = 1;
+const cellDimension = Math.sqrt((app.view.width * app.view.height) / totalCells);
+const pool = [];
+
+function createCell(color, x, y, chunkIndex) {
+    const graphics = pool.pop() || new PIXI.Graphics();
+    graphics.clear();
+    graphics.beginFill(color);
+    graphics.drawRect(0, 0, cellDimension, cellDimension);
+    graphics.endFill();
+    graphics.interactive = true;
+    graphics.on('pointerdown', () => showCellProperties({ color, x, y, chunkIndex }));
+    return graphics;
+}
+
+for (let i = 0; i < totalCells; i++) {
+    const cellX = i % 100;
+    const cellY = Math.floor(i / 100);
+    const cell = { color: colors[Math.floor(Math.random() * colors.length)], x: cellX, y: cellY, chunkIndex: Math.floor(i / 2500) % 4 };
+    chunks[cell.chunkIndex].push(cell);
+    const graphics = createCell(cell.color, cell.x, cell.y, cell.chunkIndex);
+    const x = cell.x * (cellDimension + cellGap);
+    const y = cell.y * (cellDimension + cellGap);
+    graphics.position.set(x, y);
+    app.stage.addChild(graphics);
+}
+
+app.view.addEventListener('wheel', (e) => {
+    app.stage.scale.x *= e.deltaY < 0 ? 1.1 : 0.9;
+    app.stage.scale.y = app.stage.scale.x;
+});
+
+let isDragging = false;
+let prevX, prevY;
+
+app.view.addEventListener('mousedown', (e) => {
+    isDragging = true;
+    prevX = e.clientX;
+    prevY = e.clientY;
+});
+
+app.view.addEventListener('mousemove', (e) => {
+    if (isDragging) {
+        app.stage.x += e.clientX - prevX;
+        app.stage.y += e.clientY - prevY;
+        prevX = e.clientX;
+        prevY = e.clientY;
+    }
+});
+
+app.view.addEventListener('mouseup', () => {
+    isDragging = false;
+});
+
+app.renderer.view.addEventListener('webglcontextrestored', () => {
+});
+
+app.ticker.add(() => {
+    pool.forEach(graphics => {
+        if (!app.stage.children.includes(graphics)) {
+            pool.push(graphics);
+        }
+    });
+});
+
+const appPanel = new PIXI.Application({ width: 600, height: 50, antialias: true });
+document.body.appendChild(appPanel.view);
+const text = new PIXI.Text('', { fill: 'white' });
+text.position.set(10, 10);
+appPanel.stage.addChild(text);
+
+function showCellProperties(cell) {
+    const colorName = getColorName(cell.color);
+    text.text = `Color: ${colorName}, X: ${cell.x}, Y: ${cell.y}, Chunk Index: ${cell.chunkIndex}`;
+}
+
+function getColorName(color) {
+    switch (color) {
+        case 0xff0000:
+            return 'Red';
+        case 0x00ff00:
+            return 'Green';
+        case 0x0000ff:
+            return 'Blue';
+        case 0xffff00:
+            return 'Yellow';
+        case 0xff00ff:
+            return 'Magenta';
+        case 0x00ffff:
+            return 'Cyan';
+        case 0xf0f0f0:
+            return 'Light Grey';
+        default:
+            return 'Unknown';
+    }
+}</script>
+</body>
+</html>
